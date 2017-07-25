@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:padding="1dp"
+
+    >
+
+    <android.support.v7.widget.CardView
+
+        android:id="@+id/cvListItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        card_view:cardUseCompatPadding="true"
+        card_view:cardCornerRadius="5dp"
+        card_view:cardElevation="5dp"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        card_view:contentPadding="15dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            >
+
+            <TextView
+                android:id="@+id/tvName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="In the Kitchen at a Party"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/tvPreview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tvName"
+                android:layout_marginTop="3dp"
+                android:maxLines="3"
+                android:maxLength="150"
+                android:text="When I was 17, I went to my mates house for some beers for his Birthday, I probably only had about five drinks. Come the early hours of the morning, probably around 2-3 am, I head out to the kitchen for a drink. I pour a drink of water and turn around and take a sip, and as I’m swallowing I swear I hear footsteps (the ground in the entire room is all made up of tiles), so I hold my drink down and listen for a few seconds. Next thing I know, I hear fast footsteps in front of me running towards me, and suddenly a huge cold breeze blew right through me…at that point, I just freaked out and ran back for the bedroom. I ended up waking my friend up and telling him what happened and we listened and could hear odd bangs and bumps from out there, but nothing out of the ordinary after that ever happened. I’ll still always remember it though, and it even gives me goosebumps writing this."
+                android:textColor="@color/black"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:id="@+id/tvSize"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/tvPreview"
+                android:layout_marginRight="10dp"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2 kB"
+                android:textStyle="italic"
+                android:textColor="@color/black"
+                android:textSize="13sp"/>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+</LinearLayout>
