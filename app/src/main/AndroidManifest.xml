@@ -22,7 +22,13 @@
         </activity>
 
 
-        <activity android:name=".NotepadActivity"> </activity>
+        <activity android:name=".NotepadActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
         <activity android:name=".Settings"> </activity>
         <activity android:name=".About"> </activity>
 
