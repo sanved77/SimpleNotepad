@@ -188,10 +188,48 @@ public class StartScreen extends AppCompatActivity {
             list.add(bhandar);
         }
 
+        //sortList();
+
         adapt.notifyDataSetChanged();
 
         if (adapt.getItemCount() != 0) tvNoti.setVisibility(View.GONE);
         else tvNoti.setVisibility(View.VISIBLE);
+    }
+
+    public void sortList(){
+
+        int i,j,cmp;
+        String tname,tpreview,tsize;
+
+        for(i=0;i<list.size();i++){
+
+            for(j=0;j<list.size();j++){
+
+                cmp = list.get(i).name.compareToIgnoreCase(list.get(j).name);
+
+                if(cmp > 0){
+
+                    // get(i) is alphabetically greater
+                    // swapping values
+
+                    tname = list.get(i).name;
+                    tpreview = list.get(i).preview;
+                    tsize = list.get(i).size;
+
+                    list.get(i).name = list.get(j).name;
+                    list.get(i).preview = list.get(j).preview;
+                    list.get(i).size = list.get(j).size;
+
+                    list.get(j).name = tname;
+                    list.get(j).preview = tpreview;
+                    list.get(j).size = tsize;
+
+                }
+
+            }
+
+        }
+
     }
 
     public void createFile(){
@@ -424,3 +462,4 @@ public class StartScreen extends AppCompatActivity {
         }
     }
 }
+
