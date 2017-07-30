@@ -1,13 +1,17 @@
 package com.sanved.simplenotepad;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
@@ -27,6 +31,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -50,6 +56,8 @@ public class NotepadActivity extends AppCompatActivity {
     private static String path;
     private static int num = 0;
     private int textCount = 0;
+    private boolean isContent = false;
+    private static InputStream is;
 
     File file;
 
@@ -60,16 +68,50 @@ public class NotepadActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.notepad_screen);
 
+        String action = getIntent().getAction();
+
         //Gathering data
-        if (savedInstanceState == null) {
-            Bundle extras = getIntent().getExtras();
-            name = extras.getString("name");
-            num = extras.getInt("num");
-            path = extras.getString("path");
-        } else {
-            name = (String) savedInstanceState.getSerializable("name");
-            num = savedInstanceState.getInt("num");
-            path = (String) savedInstanceState.getSerializable("path");
+        if(action == null) {
+            if (savedInstanceState == null) {
+                Bundle extras = getIntent().getExtras();
+                name = extras.getString("name");
+                num = extras.getInt("num");
+                path = extras.getString("path");
+            } else {
+                name = (String) savedInstanceState.getSerializable("name");
+                num = savedInstanceState.getInt("num");
+                path = (String) savedInstanceState.getSerializable("path");
+            }
+        }
+
+        else{
+            if(action != null && action.compareTo(Intent.ACTION_VIEW) == 0) {
+
+                String scheme = getIntent().getScheme();
+                ContentResolver resolver = getContentResolver();
+
+                if (scheme.contains("content")) {
+                    isContent = true;
+                    Uri uri = getIntent().getData();
+                    name = getContentName(resolver, uri);
+                    name = name.replaceAll("\\..*","");
+                    try {
+                        is = resolver.openInputStream(uri);
+                    }catch(FileNotFoundException fe){
+                        fe.printStackTrace();
+                        path = "null";
+                    }
+
+                }
+
+                if (scheme.contains("file")) {
+                    String pathtemp;
+                    Uri pathUri = getIntent().getData();
+                    name = pathUri.getLastPathSegment();
+                    pathtemp = pathUri.toString();
+                    path = pathtemp.replaceAll("file://", "");
+                }
+            }
         }
 
         initVals();
@@ -77,17 +119,58 @@ public class NotepadActivity extends AppCompatActivity {
                 + "/SimpleNotepad");
         if (!storage.exists()) storage.mkdirs();
 
+        if(isContent){
+            // Content text from WhatsApp and Gmail
+            try {
+                inputStreamFileReader(is);
+            }catch(IOException ioe){
+                ioe.printStackTrace();
+            }
+        }
 
-        //Engine
-        if(path.contains("null")){
-            file = new File(storage, name + ".txt");
-            saveFile(true);
-        }else{
-            file = new File(path);
-            readFile();
+        else {
+            //Engine
+            if (path.contains("null")) {
+                file = new File(storage, name + ".txt");
+                saveFile(true);
+            } else {
+                file = new File(path);
+                readFile();
+            }
         }
 
         //todo add the tour guide here
+    }
+
+    private String getContentName(ContentResolver resolver, Uri uri){
+        Cursor cursor = resolver.query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int nameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
+        if (nameIndex >= 0) {
+            return cursor.getString(nameIndex);
+        } else {
+            return null;
+        }
+    }
+
+    public void inputStreamFileReader(InputStream is) throws IOException {
+        String str="", text = "";
+        StringBuffer buf = new StringBuffer();
+
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            if (is != null) {
+                while ((str = reader.readLine()) != null) {
+                    buf.append(str + "\n" );
+                }
+            }
+        } finally {
+            try { is.close(); } catch (Throwable ignore) {}
+        }
+
+        text = buf.toString();
+
+        notepad.setText(text);
     }
 
     @Override
@@ -166,7 +249,30 @@ public class NotepadActivity extends AppCompatActivity {
     }
 
     public void saveFile(boolean vibrateAndToast){
+        int keyN;
         checkExternalMedia();
+
+        if(isContent){
+            isContent = false;
+            Toast.makeText(this, "Read Only File, cannot save, making a new file instead.", Toast.LENGTH_SHORT).show();
+            keyN = prefs.getInt("keyN", 999);
+            if(keyN == 999) {
+                ed.putInt("keyN",1).commit();
+                keyN = 1;
+            }else {
+                keyN++;
+                ed.putInt("keyN",keyN).commit();
+            }
+
+            // Create folder if not there
+            File storage = new File(Environment.getExternalStorageDirectory()
+                    + "/SimpleNotepad");
+            if (!storage.exists()) storage.mkdirs();
+            // Add file to folder
+            file = new File(storage, name + ".txt");
+
+            num = keyN;
+        }
 
         if(mExternalStorageAvailable && mExternalStorageWriteable) {
 
@@ -340,6 +446,7 @@ public class NotepadActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                             boolean fUse = prefs.getBoolean("fUse", true);
+                            isContent = false;
 
                             if(fUse){
                                 Toast.makeText(NotepadActivity.this, "Long-click the file for more options", Toast.LENGTH_SHORT).show();

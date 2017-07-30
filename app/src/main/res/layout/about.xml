@@ -24,10 +24,18 @@
             android:textColor="@color/black"
             android:padding="10dp"
             android:gravity="center"
-            android:text="Simple Notepad v 1.0\nSoftware developed by Sanved Tapkeer."
+            android:text="Simple Notepad v 2.0\nSoftware developed by Sanved Tapkeer.\nThis is developer under an open source license.
+You are free to indulge and fork it on Github."
             android:layout_marginTop="5dp"
             android:id="@+id/tv2"
             android:layout_gravity="center_horizontal" />
+
+        <Button
+            android:id="@+id/bGit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="github"/>
 
 
     </LinearLayout>
